@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OddsBetting - Prediction Markets for Friends</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Page -->
+        <div id="loginPage" class="page active">
+            <div class="container">
+                <div class="auth-box">
+                    <h1>OddsBetting</h1>
+                    <p class="subtitle">Prediction Markets for Friends</p>
+                    
+                    <div id="loginForm" class="form-section active">
+                        <h2>Login</h2>
+                        <form id="loginFormElement">
+                            <div class="form-group">
+                                <label for="loginEmail">Email</label>
+                                <input type="email" id="loginEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Password</label>
+                                <input type="password" id="loginPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                            <p class="form-footer">
+                                Don't have an account? 
+                                <a href="#" id="showRegister">Register</a>
+                            </p>
+                        </form>
+                    </div>
+                    
+                    <div id="registerForm" class="form-section">
+                        <h2>Register</h2>
+                        <form id="registerFormElement">
+                            <div class="form-group">
+                                <label for="registerUsername">Username</label>
+                                <input type="text" id="registerUsername" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerEmail">Email</label>
+                                <input type="email" id="registerEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerPassword">Password</label>
+                                <input type="password" id="registerPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerInviteCode">Invite Code</label>
+                                <input type="text" id="registerInviteCode" placeholder="FIRSTUSER" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                            <p class="form-footer">
+                                Already have an account? 
+                                <a href="#" id="showLogin">Login</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboardPage" class="page">
+            <nav class="navbar">
+                <div class="container">
+                    <div class="nav-brand">OddsBetting</div>
+                    <div class="nav-menu">
+                        <div class="nav-item">
+                            <span id="userBalance">Balance: $0</span>
+                        </div>
+                        <div class="nav-item">
+                            <span id="userName">User</span>
+                        </div>
+                        <div class="nav-item">
+                            <button id="showInviteCodeBtn" class="btn btn-secondary">My Invite Code</button>
+                        </div>
+                        <div class="nav-item">
+                            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container main-content">
+                <div class="dashboard-header">
+                    <h1>Markets</h1>
+                    <button id="createMarketBtn" class="btn btn-primary">Create Market</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="all">All Markets</button>
+                    <button class="tab-btn" data-tab="my-bets">My Bets</button>
+                </div>
+
+                <div id="allMarketsTab" class="tab-content active">
+                    <div id="marketsList" class="markets-list">
+                        <p class="loading">Loading markets...</p>
+                    </div>
+                </div>
+
+                <div id="myBetsTab" class="tab-content">
+                    <div id="betsList" class="bets-list">
+                        <p class="loading">Loading bets...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="createMarketModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create Market</h2>
+            <form id="createMarketForm">
+                <div class="form-group">
+                    <label for="marketQuestion">Question</label>
+                    <input type="text" id="marketQuestion" placeholder="Will X happen?" required>
+                </div>
+                <div class="form-group">
+                    <label for="marketDescription">Description</label>
+                    <textarea id="marketDescription" placeholder="Details about this market..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="marketCloseDate">Close Date (optional)</label>
+                    <input type="datetime-local" id="marketCloseDate">
+                </div>
+                <button type="submit" class="btn btn-primary">Create Market</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="placeBetModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Place Bet</h2>
+            <div id="betMarketInfo"></div>
+            <form id="placeBetForm">
+                <input type="hidden" id="betMarketId">
+                <div class="form-group">
+                    <label>Position</label>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-yes position-btn" data-position="YES">YES</button>
+                        <button type="button" class="btn btn-no position-btn" data-position="NO">NO</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="betAmount">Amount</label>
+                    <input type="number" id="betAmount" min="1" step="0.01" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Place Bet</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="inviteCodeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Your Invite Code</h2>
+            <div class="invite-code-display">
+                <p>Share this code with friends to invite them:</p>
+                <div class="invite-code" id="inviteCodeDisplay"></div>
+                <button id="copyInviteCode" class="btn btn-secondary">Copy Code</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="resolveMarketModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Resolve Market</h2>
+            <div id="resolveMarketInfo"></div>
+            <form id="resolveMarketForm">
+                <input type="hidden" id="resolveMarketId">
+                <div class="form-group">
+                    <label>Resolution</label>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-yes resolution-btn" data-resolution="YES">YES</button>
+                        <button type="button" class="btn btn-no resolution-btn" data-resolution="NO">NO</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Resolve Market</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
