@@ -111,29 +111,50 @@ public class BettingService
         var totalPool = market.YesPool + market.NoPool;
         var winningPool = resolution == "YES" ? market.YesPool : market.NoPool;
 
-        foreach (var bet in bets)
+        // Handle edge case: no bets on winning side
+        if (winningPool == 0)
         {
-            if (bet.Position == resolution)
+            // All bets are returned to losers since there are no winners
+            foreach (var bet in bets)
             {
-                // Winner
-                var payout = (bet.Amount / winningPool) * totalPool;
-                bet.Status = BetStatus.Won;
-                bet.Payout = payout;
-
+                bet.Status = BetStatus.Lost;
+                bet.Payout = bet.Amount; // Return original bet amount
+                
                 var user = _storage.GetUserById(bet.UserId);
                 if (user != null)
                 {
-                    user.Balance += payout;
+                    user.Balance += bet.Amount;
                     _storage.UpdateUser(user);
                 }
+                _storage.UpdateBet(bet);
             }
-            else
+        }
+        else
+        {
+            foreach (var bet in bets)
             {
-                // Loser
-                bet.Status = BetStatus.Lost;
-                bet.Payout = 0;
+                if (bet.Position == resolution)
+                {
+                    // Winner
+                    var payout = (bet.Amount / winningPool) * totalPool;
+                    bet.Status = BetStatus.Won;
+                    bet.Payout = payout;
+
+                    var user = _storage.GetUserById(bet.UserId);
+                    if (user != null)
+                    {
+                        user.Balance += payout;
+                        _storage.UpdateUser(user);
+                    }
+                }
+                else
+                {
+                    // Loser
+                    bet.Status = BetStatus.Lost;
+                    bet.Payout = 0;
+                }
+                _storage.UpdateBet(bet);
             }
-            _storage.UpdateBet(bet);
         }
 
         return true;

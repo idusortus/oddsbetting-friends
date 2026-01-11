@@ -15,14 +15,38 @@ public class AuthService
 
     public string HashPassword(string password)
     {
-        using var sha256 = SHA256.Create();
-        var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-        return Convert.ToBase64String(bytes);
+        // Use PBKDF2 with random salt for secure password hashing
+        var salt = RandomNumberGenerator.GetBytes(16);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 10000, HashAlgorithmName.SHA256, 32);
+        
+        // Combine salt and hash
+        var hashBytes = new byte[48];
+        Array.Copy(salt, 0, hashBytes, 0, 16);
+        Array.Copy(hash, 0, hashBytes, 16, 32);
+        
+        return Convert.ToBase64String(hashBytes);
     }
 
-    public bool VerifyPassword(string password, string hash)
+    public bool VerifyPassword(string password, string storedHash)
     {
-        return HashPassword(password) == hash;
+        var hashBytes = Convert.FromBase64String(storedHash);
+        
+        // Extract salt
+        var salt = new byte[16];
+        Array.Copy(hashBytes, 0, salt, 0, 16);
+        
+        // Compute hash of entered password with extracted salt
+        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 10000, HashAlgorithmName.SHA256, 32);
+        
+        // Compare hashes
+        for (int i = 0; i < 32; i++)
+        {
+            if (hashBytes[i + 16] != hash[i])
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public string GenerateInviteCode()
