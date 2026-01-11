@@ -257,7 +257,8 @@ async function loadMarkets() {
 }
 
 function createMarketCard(market) {
-    const statusClass = market.status.toLowerCase();
+    const statusMap = {0: 'open', 1: 'closed', 2: 'resolved'};
+    const statusClass = statusMap[market.status] || 'open';
     const canBet = market.status === 0; // Open
     const canResolve = currentUser && market.createdBy === currentUser.id && market.status !== 2; // Not resolved and created by user
     
